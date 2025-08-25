@@ -7,13 +7,11 @@ class Menu():
         pygame.init()
         self.game = game
         self.running = True
-        self.playing = False
+        self.playing = True
         flags = pygame.FULLSCREEN | pygame.RESIZABLE
         self.window = pygame.display.set_mode((0, 0), flags)
-        self.black = (0, 0, 0)
-        self.white = (255, 255, 255)
         
-    def draw_staff(self):
+    def draw_menu(self):
         pass
     
     def event_handle(self):
@@ -35,8 +33,8 @@ class Menu():
     
     def menuloop(self):
         while self.playing:
-            self.window.fill(self.white)
-            self.draw_staff()
+            self.window.fill((255, 255, 255))
+            self.draw_menu()
             self.check_events()
             pygame.display.update()
 
@@ -48,7 +46,7 @@ class MainMenu(Menu):
         self.imagesindex = 0
         window_height, window_width = pygame.display.Info().current_h, pygame.display.Info().current_w
         self.len = min(window_height, window_width)
-        self.rectmid = pygame.Rect(0, 0, self.len*8.5//10, self.len*8.5//10)
+        self.rectmid = pygame.Rect(0, 0, self.len*8//10, self.len*8//10)
         self.rectmid.center = (window_width//2, window_height//2)
         self.rectleft = pygame.Rect(0, 0, self.len//10, self.len//10)
         self.rectleft.center = (window_width*0.1, window_height//2)
@@ -57,12 +55,12 @@ class MainMenu(Menu):
         self.rectlist = [self.rectmid, self.rectleft, self.rectright]
         self.mainimgpath = None
 
-    def draw_staff(self):
+    def draw_menu(self):
         for i in self.rectlist:
-            pygame.draw.rect(self.window, 'white', i)
+            pygame.draw.rect(self.window, (255, 255, 255), i)
             imgpath = f'resources/images/{self.images[self.imagesindex]}'
             img = pygame.image.load(imgpath).convert()
-            img = pygame.transform.scale(img, (self.len*8.5/10, self.len*8.5/10))
+            img = pygame.transform.scale(img, (self.len*8//10, self.len*8//10))
             self.window.blit(img, self.rectmid)
             arrow = pygame.image.load(f'resources/assets/arrow.png').convert_alpha()
             arrow = pygame.transform.scale(arrow, (self.len//10, self.len//10))
@@ -74,7 +72,7 @@ class MainMenu(Menu):
         
     def event_handle(self, x, y):   
         if self.rectmid.collidepoint(x, y):
-            self.game.roll_board(self.game.difficulty, self.mainimgpath)
+            self.game.roll_board(self.mainimgpath)
             self.playing = False
             self.game.playing = True
         elif self.rectleft.collidepoint(x, y):
