@@ -86,7 +86,37 @@ class MainMenu(Menu):
             else:
                 self.imagesindex += 1
 
+class DifficultyMenu(Menu):
+    def __init__(self, game):
+        super().__init__(game)
+        window_height, window_width = pygame.display.Info().current_h, pygame.display.Info().current_w
+        self.len = min(window_height, window_width)
+        self.rectmid = pygame.Rect(0, 0, self.len//10, self.len//10)
+        self.rectmid.center = (window_width//2, window_height//2)
+        self.rectleft = pygame.Rect(0, 0, self.len//10, self.len//10)
+        self.rectleft.center = (window_width*0.3, window_height//2)
+        self.rectright = pygame.Rect(0, 0,self.len//10, self.len//10)
+        self.rectright.center = (window_width*0.7, window_height//2)
+        self.rectlist = [self.rectleft, self.rectmid, self.rectright]
+    
+    def draw_menu(self):
+        for i in self.rectlist:
+            pygame.draw.rect(self.window, (255, 255, 255), i)
+            star = pygame.image.load(f'resources/assets/star.png').convert_alpha()
+            star = pygame.transform.scale(star, (self.len//10, self.len//10))
+            self.window.blit(star, self.rectright)
+            self.window.blit(star, self.rectleft)
+            self.window.blit(star, self.rectmid)
 
-
-
-        
+    def event_handle(self, x, y):   
+        for i in self.rectlist:
+            if i.collidepoint(x, y):
+                self.game.difficulty = self.rectlist.index(i) + 3
+                self.game.tile_size = min(pygame.display.Info().current_h, pygame.display.Info().current_w)//self.game.difficulty       
+                self.game.font = pygame.font.SysFont(None, self.game.tile_size//15)
+                self.game.empty_tile_position = [self.game.difficulty - 1, self.game.difficulty - 1]
+                self.game.generate_tileset()
+                print(self.game.difficulty)
+                print(self.game.tileset)
+                self.playing = False
+                self.game.playing = True

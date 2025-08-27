@@ -1,7 +1,7 @@
 import pygame
 from random import shuffle
 from sys import exit
-from menu import Menu, MainMenu
+from menu import Menu, MainMenu, DifficultyMenu
 
 class Game():
     def __init__(self):
@@ -18,7 +18,10 @@ class Game():
         self.tileset = None
         self.empty_tile_position = [self.difficulty - 1, self.difficulty - 1]
         self.image = None
-        self.menu = MainMenu(self)
+        self.main_menu = MainMenu(self)
+        self.is_difficulty_menu = True
+        if self.is_difficulty_menu:
+            self.diff_menu = DifficultyMenu(self)
 
     def is_solvable(self, list:list): 
             inversions = 0
@@ -46,7 +49,7 @@ class Game():
                         id_list.pop()
             self.board_solved = False
             self.empty_tile_position = [self.difficulty - 1, self.difficulty - 1]
-            return temp_tileset
+            self.tileset = temp_tileset
     
     
     def move_tile(self, x, y):

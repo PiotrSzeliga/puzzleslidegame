@@ -4,5 +4,6 @@ from menu import Menu, MainMenu
 g = Game()
 
 while g.running:
-    g.menu.menuloop()
+    g.main_menu.menuloop()
+    g.diff_menu.menuloop()
     g.gameloop()
