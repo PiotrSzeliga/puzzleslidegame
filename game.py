@@ -95,9 +95,8 @@ class Game():
     
     def roll_board(self, image):
         self.tileset = self.generate_tileset()
-        img = pygame.image.load(image).convert()
         temp_size = min(pygame.display.Info().current_h, pygame.display.Info().current_w)
-        self.image = pygame.transform.scale(img, (temp_size, temp_size))
+        self.image = pygame.transform.scale(image, (temp_size, temp_size))
 
     def check_events(self):
         for event in pygame.event.get():
