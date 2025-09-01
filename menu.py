@@ -116,8 +116,8 @@ class DifficultyMenu(Menu):
     def draw_menu(self):
         for rect in self.rect_list:
             rect2 = rect.inflate(2, 2)
-            pygame.draw.rect(self.window, (0, 0, 0), rect2, 0, self.len//40)
-            pygame.draw.rect(self.window, (255, 255, 255), rect, 0, self.len//40)
+            pygame.draw.rect(self.window, (0, 0, 0), rect2)
+            pygame.draw.rect(self.window, (255, 255, 255), rect)
 
         for rect in self.star_rect_list:
             self.window.blit(self.star, rect)
