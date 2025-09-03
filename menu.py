@@ -1,12 +1,11 @@
 import pygame
 from os import listdir
-from sys import exit
+
 
 class Menu():
     def __init__(self, game):
         pygame.init()
         self.game = game
-        self.running = True
         self.playing = True
         self.window = self.game.window
         
@@ -19,7 +18,8 @@ class Menu():
     def check_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                exit()
+                self.playing = False
+                self.game.running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     pygame.display.toggle_fullscreen()
@@ -128,7 +128,6 @@ class DifficultyMenu(Menu):
                 self.game.difficulty = self.rect_list.index(i) + 3
                 self.game.tile_size = min(pygame.display.Info().current_h, pygame.display.Info().current_w)//self.game.difficulty       
                 self.game.font = pygame.font.SysFont(None, self.game.tile_size//15)
-                self.game.empty_tile_position = [self.game.difficulty - 1, self.game.difficulty - 1]
                 self.game.generate_tileset()
                 self.playing = False
                 self.game.playing = True

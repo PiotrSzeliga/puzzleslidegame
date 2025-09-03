@@ -1,165 +1,154 @@
 import pygame
 from random import shuffle
-from sys import exit
 from menu import Menu, MainMenu, DifficultyMenu
+from tile import Tile
+
 
 class Game():
     def __init__(self):
         pygame.init()
-        self.difficulty = 3
-        self.running = True,
-        self.playing = False
+        
         flags = pygame.FULLSCREEN | pygame.RESIZABLE
-        self.window = pygame.display.set_mode((0, 0), flags)
-        self.tile_size = min(pygame.display.Info().current_h, pygame.display.Info().current_w)//self.difficulty       
-        self.font = pygame.font.SysFont(None, self.tile_size//15)
-        # self.board = None
-        self.board_solved = False
+        self.window = pygame.display.set_mode((900,900), flags)
+
+        self.clock = pygame.time.Clock()
+        
+        self.running = True
+        self.playing = False
+
+        self.difficulty = 3
+        
+        self.max_board_size =  min(pygame.display.Info().current_h, pygame.display.Info().current_w)
+        self.board = pygame.Rect(0, 0, self.max_board_size, self.max_board_size)
+        self.tile_size = self.max_board_size//self.difficulty
         self.tileset = None
-        self.empty_tile_position = [self.difficulty - 1, self.difficulty - 1]
+        self.tileset_blank_index = None
+        self.is_tileset_solved = False
         self.image = None
+
+        self.font = None
+       
         self.main_menu = MainMenu(self)
-        self.is_difficulty_menu = True
-        if self.is_difficulty_menu:
-            self.diff_menu = DifficultyMenu(self)
+        self.enable_difficulty_menu = True
+        if self.enable_difficulty_menu:
+            self.difficulty_menu = DifficultyMenu(self)
+
 
     def is_solvable(self, list:list): 
-            inversions = 0
-            for i in range(0, self.difficulty ** 2 - 1):
-                for j in range(i+1, self.difficulty ** 2 - 1):
-                    if list[i] > list[j]:
-                        inversions += 1
-            if self.difficulty % 2 == 0:
-                return inversions % 2 == 1
-            else:
-                return inversions % 2 == 0
-            
+        inversions = 0
+        for i in range(0, self.difficulty ** 2 - 1):
+            for j in range(i+1, self.difficulty ** 2 - 1):
+                if list[i] > list[j]:
+                    inversions += 1
+        if self.difficulty % 2 == 0:
+            return inversions % 2 == 1
+        else:
+            return inversions % 2 == 0
+
+
     def generate_tileset(self):
-            temp_tileset = [[] for i in range(self.difficulty)]
-            id_list = [i for i in range(1, self.difficulty**2)]
+        temp_tileset = []
+        id_list = [i for i in range(1, self.difficulty**2)]
+        shuffle(id_list)
+        while not self.is_solvable(id_list):
             shuffle(id_list)
-            while not self.is_solvable(id_list):
-                shuffle(id_list)
-            for row in range(self.difficulty):
-                for column in range(self.difficulty):
-                    if row == self.difficulty - 1 and column == self.difficulty - 1:
-                        temp_tileset[row].insert(column, Game.Tile(self.difficulty**2, column, row, self.tile_size, self.difficulty))
-                    else:
-                        temp_tileset[row].insert(column, Game.Tile(id_list[-1], column, row, self.tile_size, self.difficulty))
-                        id_list.pop()
-            self.board_solved = False
-            self.empty_tile_position = [self.difficulty - 1, self.difficulty - 1]
-            self.tileset = temp_tileset
-    
-    
-    def move_tile(self, x, y):
-            if self.empty_tile_position == [x, y]:
-                return
-            if self.empty_tile_position == [x + 1, y]:
-                self.tileset[y][x], self.tileset[y][x + 1] = self.tileset[y][x + 1], self.tileset[y][x]
-                self.tileset[y][x].x, self.tileset[y][x + 1].x = self.tileset[y][x + 1].x, self.tileset[y][x].x
-                self.empty_tile_position = [x, y]
-                return
-            if self.empty_tile_position == [x - 1, y]:
-                self.tileset[y][x], self.tileset[y][x - 1] = self.tileset[y][x - 1], self.tileset[y][x]
-                self.tileset[y][x].x, self.tileset[y][x - 1].x = self.tileset[y][x - 1].x, self.tileset[y][x].x
-                self.empty_tile_position = [x, y]
-                return
-            if self.empty_tile_position == [x, y + 1]:
-                self.tileset[y][x], self.tileset[y + 1][x] = self.tileset[y + 1][x], self.tileset[y][x]
-                self.tileset[y][x].y, self.tileset[y + 1][x].y = self.tileset[y + 1][x].y, self.tileset[y][x].y
-                self.empty_tile_position = [x, y]
-                return
-            if self.empty_tile_position == [x, y - 1]:
-                self.tileset[y][x], self.tileset[y - 1][x] = self.tileset[y - 1][x], self.tileset[y][x]
-                self.tileset[y][x].y, self.tileset[y - 1][x].y = self.tileset[y - 1][x].y, self.tileset[y][x].y
-                self.empty_tile_position = [x, y]
-                return
-            return
+        id_list.insert(0, self.difficulty**2)
+        for i in range(self.difficulty):
+            for j in range(self.difficulty):
+                temp_tileset.append(Tile(self, id_list[-1], (self.board.x + j*self.tile_size, self.board.y + i*self.tile_size)))
+                id_list.pop()
+        self.is_tileset_solved = False
+        self.tileset = temp_tileset
+        self.tileset_blank_index = self.difficulty**2-1
+
+
+    def tileset_blank_swap(self, tile:Tile, blank:Tile):
+        index_tile = self.tileset.index(tile)
+        self.tileset[index_tile], self.tileset[self.tileset_blank_index] = self.tileset[self.tileset_blank_index], self.tileset[index_tile]
+        self.tileset_blank_index = index_tile
+        
+        x = (index_tile)%self.difficulty
+        y = (index_tile)//self.difficulty
+        
+        self.tileset[index_tile].pos_rect.topleft = (x*self.tile_size, y*self.tile_size)
+
     
     def is_solved(self):
-            temp_id = 1
-            for row in range(self.difficulty):
-                for column in range(self.difficulty):
-                    if self.tileset[row][column].id != temp_id:
-                        return 
-                    else:
-                        temp_id += 1
-            self.board_solved = True
-            return        
-    
-    def draw_board(self, surface, image, font):
-            for row in self.tileset:
-                for tile in row:
-                    tile.draw(surface, image, font)
-    
+        temp_id = 1
+        for tile in self.tileset:
+            if tile.id != temp_id:
+                return
+            else:
+                temp_id += 1
+        self.is_tileset_solved = True
+
+
+    def draw_board(self):
+        for tile in self.tileset:
+            tile.draw()
+
+
     def roll_board(self, image):
         self.tileset = self.generate_tileset()
-        temp_size = min(pygame.display.Info().current_h, pygame.display.Info().current_w)
-        self.image = pygame.transform.scale(image, (temp_size, temp_size))
+        self.image = pygame.transform.scale(image, (self.max_board_size, self.max_board_size))
+
 
     def check_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                exit()
+                self.playing = False
+                self.running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     pygame.display.toggle_fullscreen()
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                x, y = pygame.mouse.get_pos()
-                tilex = x // (self.tile_size)
-                tiley = y // (self.tile_size)
-                if 0 <= tilex < self.difficulty and 0 <= tiley < self.difficulty:
-                    self.move_tile(tilex, tiley)
-            elif event.type == pygame.FINGERDOWN:
-                x, y = event.x * self.window.get_height(), event.y * self.window.get_width()
-                tilex = x // (self.tile_size)
-                tiley = y // (self.tile_size)
-                if 0 <= tilex < self.difficulty and 0 <= tiley < self.difficulty:
-                    self.move_tile(tilex, tiley)
-            self.is_solved()
-            if self.board_solved:
-                self.playing =  False
-                self.menu.playing = True
+                pos = pygame.mouse.get_pos()
+                for tile in self.tileset:
+                    if tile.pos_rect.collidepoint(pos) and not tile.blank:
+                        tile.clicked = True
+                        pygame.mouse.get_rel()
+            elif event.type == pygame.MOUSEBUTTONUP:
+                for tile in self.tileset:
+                    tile.clicked = False
+            
+        for tile in self.tileset:
+            if tile.clicked:
+                x, y = pygame.mouse.get_rel()
+                rect_move_x = tile.pos_rect.move(x, 0)
+                rect_move_y = tile.pos_rect.move(0, y)
+                if not self.board.contains(rect_move_x):
+                    x = 0
+                else:
+                    collisions_x = rect_move_x.collideobjectsall(self.tileset, key=lambda t: t.pos_rect)
+                    for tile_x in collisions_x:
+                        if not tile_x.blank and tile_x.id != tile.id:
+                            x = 0
+                if not self.board.contains(rect_move_y):
+                    y = 0
+                else:
+                    collisions_y = rect_move_y.collideobjectsall(self.tileset, key=lambda t: t.pos_rect)
+                    for tile_y in collisions_y:
+                        if not tile_y.blank and tile_y.id != tile.id:
+                            y=0
+                
+                tile.pos_rect.move_ip(x, y)
+                if (tile.pos_rect.x - self.tileset[self.tileset_blank_index].pos_rect.x)**2 + (tile.pos_rect.y - self.tileset[self.tileset_blank_index].pos_rect.y)**2 <= (self.tile_size//15)**2:
+                    tile.pos_rect.topleft = self.tileset[self.tileset_blank_index].pos_rect.topleft
+                    self.tileset_blank_swap(tile, self.tileset[self.tileset_blank_index])
+
+        self.is_solved()
+        if self.is_tileset_solved:
+            self.playing =  False
+            self.main_menu.playing = True
+
 
     def gameloop(self):
         while self.playing:
             self.window.fill((255, 255, 255))
-            self.draw_board(self.window, self.image, self.font)
+            self.draw_board()
             self.check_events() 
             pygame.display.update()
-    
-    class Tile():
-        def __init__(self, id, x, y, tile_size, boardsize): 
-            self.id = id
-            self.x = x
-            self.y = y
-            self.tile_size = tile_size
-            self.boardsize = boardsize
-            imagey = (self.id-1)//self.boardsize
-            imagex = (self.id-1)%self.boardsize
-            self.imagerect = pygame.Rect(
-                imagex * tile_size, 
-                imagey * tile_size, 
-                tile_size, 
-                tile_size 
-            )
-
-        def draw(self, surface, image, font):
-            rect = pygame.Rect(
-                self.x * self.tile_size, 
-                self.y * self.tile_size, 
-                self.tile_size, 
-                self.tile_size 
-            )
-            
-            if self.id != self.boardsize**2:
-                text = font.render(str(self.id), True, (255, 255, 255), (0, 0, 0))
-                # text_rect = text.get_rect(topleft=self.imagerect.topleft)   
-                image.blit(text, self.imagerect.topleft, None, pygame.BLEND_SUB)
-            
-            if self.id != self.boardsize**2:
-                surface.blit(image, rect, self.imagerect)
-                
-
-            
+            for i in self.tileset:
+                print(f"{i.pos_rect.topleft}{i.id} ", end=" ")
+            print(self.tileset[self.tileset_blank_index].pos_rect.topleft)
+            print("\n")
