@@ -25,9 +25,9 @@ class Tile():
 
     def draw(self):
         if not self.blank:
-            text = self.game.font.render(str(self.id), True, (255, 255, 255), (0, 0, 0))
-            self.game.image.blit(text, self.img_rect.topleft, None, pygame.BLEND_SUB)
-            
             self.game.window.blit(self.game.image, self.pos_rect, self.img_rect)  
+            
+            text = self.game.font.render(str(self.id), True, (255, 255, 255), (0, 0, 0))  
+            self.game.window.blit(text, self.pos_rect.topleft, None, pygame.BLEND_SUB)
         # else:
         #     pygame.draw.rect(self.game.window, (0,0,255), self.pos_rect)

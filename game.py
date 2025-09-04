@@ -2,6 +2,7 @@ import pygame
 from random import shuffle
 from menu import Menu, MainMenu, DifficultyMenu
 from tile import Tile
+from victoryscreen import VictoryScreen
 
 
 class Game():
@@ -9,7 +10,7 @@ class Game():
         pygame.init()
         
         flags = pygame.FULLSCREEN | pygame.RESIZABLE
-        self.window = pygame.display.set_mode((900,900), flags)
+        self.window = pygame.display.set_mode((800,800), flags)
 
         self.clock = pygame.time.Clock()
         
@@ -29,9 +30,14 @@ class Game():
         self.font = None
        
         self.main_menu = MainMenu(self)
+        self.main_menu.playing = True
+        
         self.enable_difficulty_menu = True
+        self.difficulty_menu = DifficultyMenu(self)
         if self.enable_difficulty_menu:
-            self.difficulty_menu = DifficultyMenu(self)
+            self.difficulty_menu.playing = True
+        
+        self.victory_screen = VictoryScreen(self)
 
 
     def is_solvable(self, list:list): 
@@ -131,15 +137,26 @@ class Game():
                         if not tile_y.blank and tile_y.id != tile.id:
                             y=0
                 
+                tile_far = False
+                tile_perfect_x = (self.tileset.index(tile))%self.difficulty*self.tile_size
+                tile_perfect_y = (self.tileset.index(tile))//self.difficulty*self.tile_size
+                
+                if (tile.pos_rect.x - tile_perfect_x)**2 + (tile.pos_rect.y -tile_perfect_y )**2 > (self.tile_size//20)**2:
+                    tile_far = True         
+    
                 tile.pos_rect.move_ip(x, y)
-                if (tile.pos_rect.x - self.tileset[self.tileset_blank_index].pos_rect.x)**2 + (tile.pos_rect.y - self.tileset[self.tileset_blank_index].pos_rect.y)**2 <= (self.tile_size//15)**2:
+
+                if (tile.pos_rect.x - self.tileset[self.tileset_blank_index].pos_rect.x)**2 + (tile.pos_rect.y - self.tileset[self.tileset_blank_index].pos_rect.y)**2 <= (self.tile_size//20)**2:
                     tile.pos_rect.topleft = self.tileset[self.tileset_blank_index].pos_rect.topleft
                     self.tileset_blank_swap(tile, self.tileset[self.tileset_blank_index])
+                if (tile.pos_rect.x - tile_perfect_x)**2 + (tile.pos_rect.y - tile_perfect_y)**2 <= (self.tile_size//20)**2 and tile_far == True:
+                    tile.pos_rect.topleft = (tile_perfect_x, tile_perfect_y)
+
 
         self.is_solved()
         if self.is_tileset_solved:
             self.playing =  False
-            self.main_menu.playing = True
+            self.victory_screen.playing = True
 
 
     def gameloop(self):
@@ -147,8 +164,7 @@ class Game():
             self.window.fill((255, 255, 255))
             self.draw_board()
             self.check_events() 
+            # self.playing = False
+            # self.victory_screen.playing = True
             pygame.display.update()
-            for i in self.tileset:
-                print(f"{i.pos_rect.topleft}{i.id} ", end=" ")
-            print(self.tileset[self.tileset_blank_index].pos_rect.topleft)
-            print("\n")
+            

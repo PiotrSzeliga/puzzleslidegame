@@ -4,9 +4,8 @@ from os import listdir
 
 class Menu():
     def __init__(self, game):
-        pygame.init()
         self.game = game
-        self.playing = True
+        self.playing = False
         self.window = self.game.window
         
     def draw_menu(self):
@@ -26,9 +25,7 @@ class Menu():
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = pygame.mouse.get_pos()
                 self.event_handle(x, y)
-            elif event.type == pygame.FINGERDOWN:
-                x, y = event.x * self.window.get_height(), event.y * self.window.get_width()
-                self.event_handle(x, y)
+
     
     def menuloop(self):
         while self.playing:
@@ -66,15 +63,17 @@ class MainMenu(Menu):
         self.arrow_r = pygame.transform.rotate(arrow, 90)
     
     def draw_menu(self):
-        for i in self.rectlist:
-            pygame.draw.rect(self.window, (255, 255, 255), i)
         self.window.blit(self.imglist[self.imglist_index], self.rectmid)
         self.window.blit(self.arrow_l, self.rectleft)
         self.window.blit(self.arrow_r, self.rectright)
         
     def event_handle(self, x, y):   
         if self.rectmid.collidepoint(x, y):
-            self.game.roll_board(self.imglist[self.imglist_index])
+            self.game.image = pygame.transform.scale(self.imglist[self.imglist_index], (self.game.max_board_size, self.game.max_board_size))
+            if not self.game.enable_difficulty_menu:
+                self.game.tile_size = self.game.max_board_size//self.game.difficulty       
+                self.game.font = pygame.font.SysFont(None, self.game.tile_size//15)
+                self.game.generate_tileset()
             self.playing = False
             self.game.playing = True
         elif self.rectleft.collidepoint(x, y):
@@ -115,9 +114,7 @@ class DifficultyMenu(Menu):
     
     def draw_menu(self):
         for rect in self.rect_list:
-            rect2 = rect.inflate(2, 2)
-            pygame.draw.rect(self.window, (0, 0, 0), rect2)
-            pygame.draw.rect(self.window, (255, 255, 255), rect)
+            pygame.draw.rect(self.window, (0, 0, 0), rect, 2, 50)
 
         for rect in self.star_rect_list:
             self.window.blit(self.star, rect)
@@ -126,7 +123,7 @@ class DifficultyMenu(Menu):
         for i in self.rect_list:
             if i.collidepoint(x, y):
                 self.game.difficulty = self.rect_list.index(i) + 3
-                self.game.tile_size = min(pygame.display.Info().current_h, pygame.display.Info().current_w)//self.game.difficulty       
+                self.game.tile_size = self.game.max_board_size//self.game.difficulty       
                 self.game.font = pygame.font.SysFont(None, self.game.tile_size//15)
                 self.game.generate_tileset()
                 self.playing = False
