@@ -1,5 +1,6 @@
 import pygame
 from os import listdir
+from button import Button
 
 
 class Menu():
@@ -17,6 +18,7 @@ class Menu():
     def check_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                self.game.difficulty_menu.playing = False
                 self.playing = False
                 self.game.running = False
             elif event.type == pygame.KEYDOWN:
@@ -51,37 +53,48 @@ class MainMenu(Menu):
 
         self.rectmid = pygame.Rect(0, 0, self.len*8//10, self.len*8//10)
         self.rectmid.center = (window_width//2, window_height//2)
-        self.rectleft = pygame.Rect(0, 0, self.len//10, self.len//10)
-        self.rectleft.center = (window_width*0.1, window_height//2)
-        self.rectright = pygame.Rect(0, 0,self.len//10, self.len//10)
-        self.rectright.center = (window_width*0.9, window_height//2)
-        self.rectlist = [self.rectmid, self.rectleft, self.rectright]
-        
+       
         arrow = pygame.image.load(f'resources/assets/arrow.png').convert_alpha()
-        arrow = pygame.transform.scale(arrow, (self.len//10, self.len//10))
-        self.arrow_l = pygame.transform.rotate(arrow, -90)
-        self.arrow_r = pygame.transform.rotate(arrow, 90)
-    
+        arrow_l = pygame.transform.rotate(arrow, -90)
+        arrow_r = pygame.transform.rotate(arrow, 90)
+        self.left_arrow_button = Button(
+            self.window,
+            (self.len//10, self.len//10),
+            (window_width*0.1, window_height//2),
+            arrow_l,
+            (self.len//10, self.len//10))
+        self.right_arrow_button = Button(
+            self.window,
+            (self.len//10, self.len//10),
+            (window_width*0.9, window_height//2),
+            arrow_r,
+            (self.len//10, self.len//10))
+
+
     def draw_menu(self):
         self.window.blit(self.imglist[self.imglist_index], self.rectmid)
-        self.window.blit(self.arrow_l, self.rectleft)
-        self.window.blit(self.arrow_r, self.rectright)
+        self.left_arrow_button.draw()
+        self.right_arrow_button.draw()
+
         
     def event_handle(self, x, y):   
         if self.rectmid.collidepoint(x, y):
             self.game.image = pygame.transform.scale(self.imglist[self.imglist_index], (self.game.max_board_size, self.game.max_board_size))
+            self.game.difficulty_menu.playing = True
             if not self.game.enable_difficulty_menu:
                 self.game.tile_size = self.game.max_board_size//self.game.difficulty       
                 self.game.font = pygame.font.SysFont(None, self.game.tile_size//15)
                 self.game.generate_tileset()
+                self.game.difficulty_menu.playing = False
             self.playing = False
-            self.game.playing = True
-        elif self.rectleft.collidepoint(x, y):
+        # elif self.rectleft.collidepoint(x, y):
+        elif self.left_arrow_button.button_rect.collidepoint(x, y):
             if self.imglist_index == 0:
                 self.imglist_index = len(self.imglist)-1
             else:
                 self.imglist_index -= 1
-        elif self.rectright.collidepoint(x, y):
+        # elif self.rectright.collidepoint(x, y):
+        elif self.right_arrow_button.button_rect.collidepoint(x, y):
             if self.imglist_index == len(self.imglist)-1:
                 self.imglist_index = 0
             else:

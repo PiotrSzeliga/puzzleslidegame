@@ -3,6 +3,8 @@ from random import shuffle
 from menu import Menu, MainMenu, DifficultyMenu
 from tile import Tile
 from victoryscreen import VictoryScreen
+from button import Button
+from infopage import InfoPage
 
 
 class Game():
@@ -10,7 +12,7 @@ class Game():
         pygame.init()
         
         flags = pygame.FULLSCREEN | pygame.RESIZABLE
-        self.window = pygame.display.set_mode((800,800), flags)
+        self.window = pygame.display.set_mode((0,0), flags)
 
         self.clock = pygame.time.Clock()
         
@@ -19,13 +21,15 @@ class Game():
 
         self.difficulty = 3
         
-        self.max_board_size =  min(pygame.display.Info().current_h, pygame.display.Info().current_w)
+        window_height, window_width = pygame.display.Info().current_h, pygame.display.Info().current_w
+        self.max_board_size =  min(window_height, window_width)
         self.board = pygame.Rect(0, 0, self.max_board_size, self.max_board_size)
         self.tile_size = self.max_board_size//self.difficulty
         self.tileset = None
         self.tileset_blank_index = None
         self.is_tileset_solved = False
         self.image = None
+        self.tile_draw_id = True
 
         self.font = None
        
@@ -39,7 +43,25 @@ class Game():
         
         self.victory_screen = VictoryScreen(self)
 
+        home = pygame.image.load(f'resources/assets/home.png').convert_alpha()
+        reset = pygame.image.load(f'resources/assets/reset.png').convert_alpha()
+        info = pygame.image.load(f'resources/assets/info.png').convert_alpha()
+        
+        if window_width > window_height:
+            len = window_width - ((window_width-self.max_board_size)//2)
+    
+            self.home_button = Button(self.window, (self.tile_size//3, self.tile_size//3), (len , window_height*0.3), home, (self.tile_size//10, self.tile_size//10), True, 2, 25, (0,0,0))
+            self.reset_button = Button(self.window, (self.tile_size//3, self.tile_size//3), (len , window_height*0.5), reset, (self.tile_size//10, self.tile_size//10), True, 2, 25, (0,0,0))
+            self.info_button = Button(self.window, (self.tile_size//3, self.tile_size//3), (len , window_height*0.7), info, (self.tile_size//10, self.tile_size//10), True, 2, 25, (0,0,0))
+        else:
+            len =  window_height - ((window_height-self.max_board_size)//2)
+            self.home_button = Button(self.window, (self.tile_size//3, self.tile_size//3), (window_height*0.3, len), home, (self.tile_size//10, self.tile_size//10), True, 2, 25, (0,0,0))
+            self.reset_button = Button(self.window, (self.tile_size//3, self.tile_size//3), (window_height*0.5, len), reset, (self.tile_size//10, self.tile_size//10), True, 2, 25, (0,0,0))
+            self.info_button = Button(self.window, (self.tile_size//3, self.tile_size//3), (window_height*0.7, len), info, (self.tile_size//10, self.tile_size//10), True, 2, 25, (0,0,0))
 
+        self.infopage = InfoPage(self)
+
+    
     def is_solvable(self, list:list): 
         inversions = 0
         for i in range(0, self.difficulty ** 2 - 1):
@@ -61,7 +83,7 @@ class Game():
         id_list.insert(0, self.difficulty**2)
         for i in range(self.difficulty):
             for j in range(self.difficulty):
-                temp_tileset.append(Tile(self, id_list[-1], (self.board.x + j*self.tile_size, self.board.y + i*self.tile_size)))
+                temp_tileset.append(Tile(self, id_list[-1], (self.board.x + j*self.tile_size, self.board.y + i*self.tile_size), self.tile_draw_id))
                 id_list.pop()
         self.is_tileset_solved = False
         self.tileset = temp_tileset
@@ -94,9 +116,13 @@ class Game():
             tile.draw()
 
 
-    def roll_board(self, image):
-        self.tileset = self.generate_tileset()
-        self.image = pygame.transform.scale(image, (self.max_board_size, self.max_board_size))
+    def draw_buttons(self):
+    #     for button, image in zip(self.buttons_list, self.button_images_list):
+    #         pygame.draw.rect(self.window, (0, 0, 0), button, 2, 30)
+    #         self.window.blit(image, button)
+        self.home_button.draw()
+        self.reset_button.draw()
+        self.info_button.draw()
 
 
     def check_events(self):
@@ -109,10 +135,18 @@ class Game():
                     pygame.display.toggle_fullscreen()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
-                for tile in self.tileset:
-                    if tile.pos_rect.collidepoint(pos) and not tile.blank:
-                        tile.clicked = True
-                        pygame.mouse.get_rel()
+                if self.home_button.button_rect.collidepoint(pos):
+                    self.main_menu.playing = True
+                    self.playing = False
+                elif self.reset_button.button_rect.collidepoint(pos):
+                    self.generate_tileset()
+                elif self.info_button.button_rect.collidepoint(pos):
+                    self.infopage.playing = True
+                else:
+                    for tile in self.tileset:
+                        if tile.pos_rect.collidepoint(pos) and not tile.blank:
+                            tile.clicked = True
+                            pygame.mouse.get_rel()
             elif event.type == pygame.MOUSEBUTTONUP:
                 for tile in self.tileset:
                     tile.clicked = False
@@ -152,18 +186,33 @@ class Game():
                 if (tile.pos_rect.x - tile_perfect_x)**2 + (tile.pos_rect.y - tile_perfect_y)**2 <= (self.tile_size//20)**2 and tile_far == True:
                     tile.pos_rect.topleft = (tile_perfect_x, tile_perfect_y)
 
-
         self.is_solved()
         if self.is_tileset_solved:
             self.playing =  False
             self.victory_screen.playing = True
 
 
+    def cut_rounded_image(self, image, radius):
+        w, h = image.get_size()
+
+        mask = pygame.Surface((w,h), pygame.SRCALPHA)
+        pygame.draw.rect(mask, (255,255,255,255), (0,0,w,h), border_radius=radius)
+
+        rounded = pygame.Surface((w,h), pygame.SRCALPHA)
+        rounded.blit(image, (0,0))
+
+        rounded.blit(mask, (0,0), special_flags=pygame.BLEND_RGBA_MULT)
+        return rounded
+
+
+    
     def gameloop(self):
         while self.playing:
             self.window.fill((255, 255, 255))
             self.draw_board()
+            self.draw_buttons()
             self.check_events() 
+            self.infopage.infopageloop()
             # self.playing = False
             # self.victory_screen.playing = True
             pygame.display.update()
