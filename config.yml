@@ -1,0 +1,22 @@
+puzzleslidegame: 
+  #rgb format python tuple [red, green, blue] background color
+  color_background: !!python/tuple [255,255,255]
+  #rgb format python tuple [red, green, blue] color of menu elements
+  color_lines: !!python/tuple [0,0,0]
+  #string name of font used in the game, pygame.font.get_fonts() for names of the system fonts
+  font_name: "freesansbold"
+difficulty_menu:
+  #display difficulty menu if true
+  is_difficulty_menu: true
+  #easiest base_difficulty is 3 (3x3 board)
+  base_difficulty: 3
+tiles:
+  #display id on top of tiles if true
+  is_id_displayed: true
+info_screen:
+  pol:
+    - "Celem łamigłówki jest stworzenie obrazu poprzez ułożenie kafelków w odpowiedniej kolejności"
+    - "Zmień stan planszy przesuwając kafelki w pustą przestrzeń układanki"
+  eng:
+    - "The goal of the puzzle is to complete the picture by rearranging tiles in a correct order"
+    - "Change the state of the board by sliding tiles into an empty space"

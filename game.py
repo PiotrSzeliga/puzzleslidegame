@@ -1,4 +1,5 @@
 import pygame
+import yaml
 from random import shuffle
 from menu import Menu, MainMenu, DifficultyMenu
 from tile import Tile
@@ -19,7 +20,14 @@ class Game():
         self.running = True
         self.playing = False
 
-        self.difficulty = 3
+        with open("config.yml", 'r') as f:
+            self.config = yaml.load(f, Loader=yaml.FullLoader)
+        
+        
+        self.difficulty = self.config["difficulty_menu"]["base_difficulty"]
+        
+        self.background_color = self.config["puzzleslidegame"]["color_background"]
+        self.lines_color = self.config["puzzleslidegame"]["color_lines"]
         
         window_height, window_width = pygame.display.Info().current_h, pygame.display.Info().current_w
         self.max_board_size =  min(window_height, window_width)
@@ -29,14 +37,14 @@ class Game():
         self.tileset_blank_index = None
         self.is_tileset_solved = False
         self.image = None
-        self.tile_draw_id = True
+        self.tile_draw_id = self.config["tiles"]["is_id_displayed"]
 
-        self.font = None
+        self.font = pygame.font.SysFont(self.config["puzzleslidegame"]["font_name"], self.tile_size//15)
        
         self.main_menu = MainMenu(self)
         self.main_menu.playing = True
         
-        self.enable_difficulty_menu = True
+        self.enable_difficulty_menu = self.config["difficulty_menu"]["is_difficulty_menu"]
         self.difficulty_menu = DifficultyMenu(self)
         if self.enable_difficulty_menu:
             self.difficulty_menu.playing = True
@@ -49,15 +57,50 @@ class Game():
         
         if window_width > window_height:
             len = window_width - ((window_width-self.max_board_size)//2)
-    
-            self.home_button = Button(self.window, (self.tile_size//3, self.tile_size//3), (len , window_height*0.3), home, (self.tile_size//10, self.tile_size//10), True, 2, 25, (0,0,0))
-            self.reset_button = Button(self.window, (self.tile_size//3, self.tile_size//3), (len , window_height*0.5), reset, (self.tile_size//10, self.tile_size//10), True, 2, 25, (0,0,0))
-            self.info_button = Button(self.window, (self.tile_size//3, self.tile_size//3), (len , window_height*0.7), info, (self.tile_size//10, self.tile_size//10), True, 2, 25, (0,0,0))
+            self.home_button = Button(
+                self.window, 
+                (self.tile_size//3, self.tile_size//3), 
+                (len , window_height*0.3), 
+                home, 
+                (self.tile_size//10, self.tile_size//10), 
+                True, 2, 25, self.background_color)
+            self.reset_button = Button(
+                self.window, 
+                (self.tile_size//3, self.tile_size//3), 
+                (len , window_height*0.5), 
+                reset, 
+                (self.tile_size//10, self.tile_size//10), 
+                True, 2, 25, self.background_color)
+            self.info_button = Button(
+                self.window, 
+                (self.tile_size//3, self.tile_size//3), 
+                (len , window_height*0.7), 
+                info, 
+                (self.tile_size//10, self.tile_size//10), 
+                True, 2, 25, self.background_color)
         else:
             len =  window_height - ((window_height-self.max_board_size)//2)
-            self.home_button = Button(self.window, (self.tile_size//3, self.tile_size//3), (window_height*0.3, len), home, (self.tile_size//10, self.tile_size//10), True, 2, 25, (0,0,0))
-            self.reset_button = Button(self.window, (self.tile_size//3, self.tile_size//3), (window_height*0.5, len), reset, (self.tile_size//10, self.tile_size//10), True, 2, 25, (0,0,0))
-            self.info_button = Button(self.window, (self.tile_size//3, self.tile_size//3), (window_height*0.7, len), info, (self.tile_size//10, self.tile_size//10), True, 2, 25, (0,0,0))
+            self.home_button = Button(
+                self.window, 
+                (self.tile_size//3, self.tile_size//3), 
+                (window_height*0.3, len), 
+                home, 
+                (self.tile_size//10, self.tile_size//10), 
+                True, 2, 25, self.background_color)
+            self.reset_button = Button(
+                self.window, 
+                (self.tile_size//3, self.tile_size//3), 
+                (window_height*0.5, len), 
+                reset, 
+                (self.tile_size//10, self.tile_size//10), 
+                True, 2, 25, self.background_color)
+            self.info_button = Button(
+                self.window, 
+                (self.tile_size//3, self.tile_size//3), 
+                (window_height*0.7, len), 
+                info, 
+                (self.tile_size//10, self.tile_size//10), 
+                True, 2, 25, self.background_color)
 
         self.infopage = InfoPage(self)
 
@@ -117,9 +160,6 @@ class Game():
 
 
     def draw_buttons(self):
-    #     for button, image in zip(self.buttons_list, self.button_images_list):
-    #         pygame.draw.rect(self.window, (0, 0, 0), button, 2, 30)
-    #         self.window.blit(image, button)
         self.home_button.draw()
         self.reset_button.draw()
         self.info_button.draw()
@@ -208,7 +248,7 @@ class Game():
     
     def gameloop(self):
         while self.playing:
-            self.window.fill((255, 255, 255))
+            self.window.fill(self.background_color)
             self.draw_board()
             self.draw_buttons()
             self.check_events() 
