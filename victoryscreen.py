@@ -32,6 +32,7 @@ class VictoryScreen():
             self.text = self.eng_text
  
         arrow = pygame.image.load(f'resources/assets/arrow.png').convert_alpha()
+        arrow = self.game.ui_color_change(arrow)
         arrow = pygame.transform.rotate(arrow, 90)
         self.img_rect = pygame.Rect(0, 0, self.game.max_board_size, self.game.max_board_size)
         
@@ -94,8 +95,8 @@ class VictoryScreen():
         self.window.blit(self.game.image, self.img_rect)
         self.continue_button.draw()
 
-        text = self.game.font.render(self.text[0], True, self.game.lines_color) 
-        text2 = self.game.font.render(self.text[1], True, self.game.lines_color) 
+        text = self.game.font.render(self.text[0], True, self.game.text_color) 
+        text2 = self.game.font.render(self.text[1], True, self.game.text_color) 
         
         if self.game.config["victory_screen"]["is_victory_text_displayed"]:
             text_rect = text.get_rect(midbottom = self.continue_button.button_rect.midtop)

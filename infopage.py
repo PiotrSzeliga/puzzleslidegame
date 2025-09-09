@@ -71,8 +71,8 @@ class InfoPage():
     def draw_page(self):
         self.pol_button.draw()
         self.eng_button.draw()
-        text = self.game.font.render(self.text[0], True, self.game.lines_color) 
-        text2 = self.game.font.render(self.text[1], True, self.game.lines_color) 
+        text = self.game.font.render(self.text[0], True, self.game.text_color) 
+        text2 = self.game.font.render(self.text[1], True, self.game.text_color) 
         self.page_surface.blit(text, (self.game.max_board_size*0.1, self.game.max_board_size*0.2))
         self.page_surface.blit(text2, (self.game.max_board_size*0.1, self.game.max_board_size*0.9))
         self.page_surface.blit(self.instruction_img, self.instruction_img_rect)

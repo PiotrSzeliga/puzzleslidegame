@@ -59,10 +59,12 @@ class MainMenu(Menu):
        
         play_img = pygame.image.load("resources/assets/play.png").convert_alpha()
         self.play_img = pygame.transform.scale(play_img, (self.len*0.1, self.len*0.1))
+        self.play_img = self.game.ui_color_change(self.play_img)
         self.play_img_rect = pygame.Rect((0,0), (self.len*0.1, self.len*0.1))
         self.play_img_rect.center = self.rect_mid.center
         
         arrow = pygame.image.load("resources/assets/arrow.png").convert_alpha()
+        arrow = self.game.ui_color_change(arrow)
         arrow_l = pygame.transform.rotate(arrow, -90)
         arrow_r = pygame.transform.rotate(arrow, 90)
         
@@ -138,6 +140,7 @@ class DifficultyMenu(Menu):
         self.rect_list = [self.rect_left, self.rectmid, self.rect_right]
     
         star = pygame.image.load('resources/assets/star.png').convert_alpha()
+        star = self.game.ui_color_change(star)
         self.star = pygame.transform.scale(star, (self.len//20, self.len//20))
 
         star_rect_0 = self.star.get_rect(center = self.rect_left.center)

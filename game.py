@@ -27,6 +27,7 @@ class Game():
         
         self.background_color = self.config["puzzleslidegame"]["color_background"]
         self.lines_color = self.config["puzzleslidegame"]["color_lines"]
+        self.text_color = self.config["puzzleslidegame"]["text_color"]
         
         window_height, window_width = pygame.display.Info().current_h, pygame.display.Info().current_w
         self.max_board_size =  min(window_height, window_width)
@@ -53,6 +54,9 @@ class Game():
         home = pygame.image.load(f'resources/assets/home.png').convert_alpha()
         reset = pygame.image.load(f'resources/assets/reset.png').convert_alpha()
         info = pygame.image.load(f'resources/assets/info.png').convert_alpha()
+        home = self.ui_color_change(home)
+        reset = self.ui_color_change(reset)
+        info = self.ui_color_change(info)
         
         if window_width > window_height:
             len = window_width - ((window_width-self.max_board_size)//2)
@@ -62,21 +66,21 @@ class Game():
                 (len , window_height*0.3), 
                 home, 
                 (self.tile_size//10, self.tile_size//10), 
-                True, 2, 25, self.background_color)
+                True, 2, 25, self.lines_color)
             self.reset_button = Button(
                 self.window, 
                 (self.tile_size//3, self.tile_size//3), 
                 (len , window_height*0.5), 
                 reset, 
                 (self.tile_size//10, self.tile_size//10), 
-                True, 2, 25, self.background_color)
+                True, 2, 25, self.lines_color)
             self.info_button = Button(
                 self.window, 
                 (self.tile_size//3, self.tile_size//3), 
                 (len , window_height*0.7), 
                 info, 
                 (self.tile_size//10, self.tile_size//10), 
-                True, 2, 25, self.background_color)
+                True, 2, 25, self.lines_color)
         else:
             len =  window_height - ((window_height-self.max_board_size)//2)
             self.home_button = Button(
@@ -85,21 +89,21 @@ class Game():
                 (window_height*0.3, len), 
                 home, 
                 (self.tile_size//10, self.tile_size//10), 
-                True, 2, 25, self.background_color)
+                True, 2, 25, self.lines_color)
             self.reset_button = Button(
                 self.window, 
                 (self.tile_size//3, self.tile_size//3), 
                 (window_height*0.5, len), 
                 reset, 
                 (self.tile_size//10, self.tile_size//10), 
-                True, 2, 25, self.background_color)
+                True, 2, 25, self.lines_color)
             self.info_button = Button(
                 self.window, 
                 (self.tile_size//3, self.tile_size//3), 
                 (window_height*0.7, len), 
                 info, 
                 (self.tile_size//10, self.tile_size//10), 
-                True, 2, 25, self.background_color)
+                True, 2, 25, self.lines_color)
 
         self.infopage = InfoPage(self)
 
@@ -242,6 +246,14 @@ class Game():
 
         rounded.blit(mask, (0,0), special_flags=pygame.BLEND_RGBA_MULT)
         return rounded
+
+
+    def ui_color_change(self, image):
+        color = self.config["puzzleslidegame"]["ui_elements_color"]
+        image = image.copy()
+        image.fill((0,0,0,255), None, pygame.BLEND_RGBA_MULT)
+        image.fill(color, None, pygame.BLEND_RGB_ADD)
+        return image
 
 
     def gameloop(self):

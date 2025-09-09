@@ -28,5 +28,5 @@ class Tile():
         if not self.blank:
             self.game.window.blit(self.game.image, self.pos_rect, self.img_rect)  
             if self.draw_id:
-                text = self.game.font.render(str(self.id), True, (255, 255, 255), (0, 0, 0))  
-                self.game.window.blit(text, self.pos_rect.topleft, None, pygame.BLEND_SUB)
+                text = self.game.font.render(str(self.id), True, self.game.config["tiles"]["id_display_color"])  
+                self.game.window.blit(text, self.pos_rect.topleft, None)

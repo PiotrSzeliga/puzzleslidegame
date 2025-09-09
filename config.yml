@@ -1,8 +1,12 @@
 puzzleslidegame: 
-  #rgb format python tuple [red, green, blue] background color
+  #(rgb format python tuple) [red, green, blue] background color
   color_background: !!python/tuple [255,255,255]
-  #rgb format python tuple [red, green, blue] color of menu elements
-  color_lines: !!python/tuple [0,0,0]
+  #(rgb format python tuple) [red, green, blue] color of menu elements
+  color_lines: !!python/tuple [255,0,0]
+  #(rgb format python tuple) [red, green, blue] color of some ui elements (those that are pngs blitet onto surfaces like home button or arrows)
+  ui_elements_color: !!python/tuple [0,255,0]
+  #(rgb format python tuple) [red, green, blue] color of the text
+  text_color: !!python/tuple [0,255,255]
   #string name of font used in the game, pygame.font.get_fonts() for names of the system fonts
   font_name: "freesansbold"
   #languiage in info page and victory screen (0=pol, 1=eng)
@@ -15,6 +19,8 @@ difficulty_menu:
 tiles:
   #display id on top of tiles if true
   is_id_displayed: true
+  #(rgb format python tuple) color of the id one the tiles
+  id_display_color: !!python/tuple [0,255,255]
 info_screen:
   #lines of text displayed on the info panel (string format)
   pol:
