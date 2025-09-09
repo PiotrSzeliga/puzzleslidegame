@@ -8,7 +8,7 @@ class InfoPage():
         self.playing = False
         self.page_surface = pygame.Surface((self.game.max_board_size, self.game.max_board_size))
         self.page = pygame.Rect((0,0),(self.game.max_board_size, self.game.max_board_size))
-        self.base_language = 0
+        self.base_language = self.game.config["puzzleslidegame"]["base_language"]
         
         instruction = pygame.image.load(f'resources/assets/instruction.png').convert_alpha()
         self.instruction_img = pygame.transform.scale(instruction, (self.game.max_board_size, self.game.max_board_size))

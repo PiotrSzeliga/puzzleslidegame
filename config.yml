@@ -5,6 +5,8 @@ puzzleslidegame:
   color_lines: !!python/tuple [0,0,0]
   #string name of font used in the game, pygame.font.get_fonts() for names of the system fonts
   font_name: "freesansbold"
+  #languiage in info page and victory screen (0=pol, 1=eng)
+  base_language: 0
 difficulty_menu:
   #display difficulty menu if true
   is_difficulty_menu: true
@@ -14,9 +16,22 @@ tiles:
   #display id on top of tiles if true
   is_id_displayed: true
 info_screen:
+  #lines of text displayed on the info panel (string format)
   pol:
     - "Celem łamigłówki jest stworzenie obrazu poprzez ułożenie kafelków w odpowiedniej kolejności"
     - "Zmień stan planszy przesuwając kafelki w pustą przestrzeń układanki"
   eng:
     - "The goal of the puzzle is to complete the picture by rearranging tiles in a correct order"
     - "Change the state of the board by sliding tiles into an empty space"
+victory_screen:
+  #display text above the continue button if true
+  is_victory_text_displayed: true
+  #display text below the continue button if true
+  is_continue_text_displayed: true
+  #lines of text displayed on the victory panel (string format)
+  pol:
+  - "WYGRANA"
+  - "Kliknij aby kontynuować"
+  eng:
+  - "VICTORY"
+  - "Click to continue"

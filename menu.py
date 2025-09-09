@@ -65,18 +65,33 @@ class MainMenu(Menu):
         arrow = pygame.image.load("resources/assets/arrow.png").convert_alpha()
         arrow_l = pygame.transform.rotate(arrow, -90)
         arrow_r = pygame.transform.rotate(arrow, 90)
-        self.left_arrow_button = Button(
-            self.window,
-            (self.len//10, self.len//10),
-            (window_width*0.1, window_height//2),
-            arrow_l,
-            (self.len//10, self.len//10))
-        self.right_arrow_button = Button(
-            self.window,
-            (self.len//10, self.len//10),
-            (window_width*0.9, window_height//2),
-            arrow_r,
-            (self.len//10, self.len//10))
+        
+        if window_width > window_height:
+            self.left_arrow_button = Button(
+                self.window,
+                (self.len//10, self.len//10),
+                (window_width*0.1, window_height//2),
+                arrow_l,
+                (self.len//10, self.len//10))
+            self.right_arrow_button = Button(
+                self.window,
+                (self.len//10, self.len//10),
+                (window_width*0.9, window_height//2),
+                arrow_r,
+                (self.len//10, self.len//10))
+        else:
+            self.left_arrow_button = Button(
+                self.window,
+                (self.len//10, self.len//10),
+                (window_width*0.3, window_height*0.8),
+                arrow_l,
+                (self.len//10, self.len//10))
+            self.right_arrow_button = Button(
+                self.window,
+                (self.len//10, self.len*0/8),
+                (window_width*0.8, window_height//2),
+                arrow_r,
+                (self.len//10, self.len//10))
 
 
     def draw_menu(self):

@@ -23,7 +23,6 @@ class Game():
         with open("config.yml", 'r') as f:
             self.config = yaml.load(f, Loader=yaml.FullLoader)
         
-        
         self.difficulty = self.config["difficulty_menu"]["base_difficulty"]
         
         self.background_color = self.config["puzzleslidegame"]["color_background"]
@@ -245,7 +244,6 @@ class Game():
         return rounded
 
 
-    
     def gameloop(self):
         while self.playing:
             self.window.fill(self.background_color)
